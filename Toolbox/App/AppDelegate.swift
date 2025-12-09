@@ -13,7 +13,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   let presenter = ToolPresenter()
   private var statusItemController: StatusItemController?
 
-  // Retain the welcome window via a controller to avoid premature teardown
   private var welcomeWindowController: NSWindowController?
 
   func applicationDidFinishLaunching(_ notification: Notification) {
