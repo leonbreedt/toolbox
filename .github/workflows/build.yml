@@ -34,7 +34,7 @@ jobs:
         KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
         # Decode certificate from base64
-        echo -n "$CERTIFICATE_BASE64" | base64 -d > $CERTIFICATE_PATH
+        echo "$CERTIFICATE_BASE64" | tr -d '\n' | base64 -d > $CERTIFICATE_PATH
 
         # Create temporary keychain
         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -42,11 +42,10 @@ jobs:
         security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
         # Import certificate to keychain
-        security import $CERTIFICATE_PATH -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        security list-keychain -d user -s $KEYCHAIN_PATH
+        security import $CERTIFICATE_PATH -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH >/dev/null 2>&1
 
         # Set partition list to allow codesign to access the keychain
-        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH >/dev/null 2>&1
 
     - name: Build app (with code signing)
       if: github.event_name != 'pull_request'
@@ -72,31 +71,6 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
           DEVELOPMENT_TEAM=""
-
-    - name: Notarize app
-      if: github.event_name != 'pull_request'
-      env:
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      run: |
-        APP_PATH="./build/Build/Products/Release/Toolbox.app"
-
-        # Create a ZIP for notarization
-        ditto -c -k --keepParent "$APP_PATH" Toolbox.zip
-
-        # Submit for notarization
-        xcrun notarytool submit Toolbox.zip \
-          --apple-id "$APPLE_ID" \
-          --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-          --team-id "$APPLE_TEAM_ID" \
-          --wait
-
-        # Staple the notarization ticket
-        xcrun stapler staple "$APP_PATH"
-
-        # Clean up ZIP
-        rm Toolbox.zip
 
     - name: Create DMG
       run: |
@@ -128,6 +102,9 @@ jobs:
           --password "$APPLE_APP_SPECIFIC_PASSWORD" \
           --team-id "$APPLE_TEAM_ID" \
           --wait
+
+        # Wait a bit for the ticket to propagate
+        sleep 10
 
         # Staple the notarization ticket to DMG
         xcrun stapler staple Toolbox.dmg
