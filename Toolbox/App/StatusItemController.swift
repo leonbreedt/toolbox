@@ -17,8 +17,6 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
   private let menuMinimumWidth: CGFloat = 240
 
-  private var aboutWindowController: NSWindowController?
-
   init(registry: ToolRegistry, presenter: ToolPresenter) {
     self.registry = registry
     self.presenter = presenter
@@ -30,22 +28,31 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     configureStatusItem()
     configureMenu()
+
+    rebuildMenu()
   }
 
   private func configureStatusItem() {
-    if let button = statusItem.button {
-      button.image = NSImage(
-        systemSymbolName: "wrench.and.screwdriver",
-        accessibilityDescription: "Toolbox"
-      )
+    guard let button = statusItem.button else {
+      return
+    }
+
+    if let image = NSImage(
+      systemSymbolName: "wrench.and.screwdriver",
+      accessibilityDescription: "Toolbox"
+    ) {
+      button.image = image
       button.image?.isTemplate = true
     }
+
+    statusItem.isVisible = true
   }
 
   private func configureMenu() {
     menu.delegate = self
     menu.autoenablesItems = false
     menu.minimumWidth = menuMinimumWidth
+
     statusItem.menu = menu
   }
 
@@ -57,13 +64,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     menu.removeAllItems()
 
     let headingItem = NSMenuItem()
+    headingItem.view = makeHeadingView(title: "Toolbox")
     headingItem.isEnabled = false
-    headingItem.attributedTitle = NSAttributedString(
-      string: "Toolbox",
-      attributes: [
-        .font: NSFont.systemFont(ofSize: 13, weight: .bold)
-      ]
-    )
     menu.addItem(headingItem)
     menu.addItem(.separator())
 
@@ -74,15 +76,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     for (index, category) in categoriesWithTools.enumerated() {
       let categoryItem = NSMenuItem()
-
+      categoryItem.view = makeCategoryHeadingView(title: category.displayName)
       categoryItem.isEnabled = false
-      categoryItem.attributedTitle = NSAttributedString(
-        string: category.displayName,
-        attributes: [
-          .font: NSFont.systemFont(ofSize: 12, weight: .semibold),
-          .foregroundColor: NSColor.secondaryLabelColor,
-        ]
-      )
       menu.addItem(categoryItem)
 
       guard let tools = registry.toolsByCategory[category] else {
@@ -134,18 +129,70 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     menu.addItem(quitItem)
   }
 
-  private var appDisplayName: String {
-    if let name = Bundle.main.object(
-      forInfoDictionaryKey: "CFBundleDisplayName"
-    ) as? String, !name.isEmpty {
-      return name
-    }
-    if let name = Bundle.main.object(forInfoDictionaryKey: "CFBundleName")
-      as? String, !name.isEmpty
-    {
-      return name
-    }
-    return "Toolbox"
+  private func makeHeadingView(title: String) -> NSView {
+    let label = NSTextField(labelWithString: title)
+    label.font = NSFont.systemFont(ofSize: 13, weight: .bold)
+    label.textColor = .labelColor
+    label.alignment = .left
+    label.lineBreakMode = .byTruncatingTail
+
+    let container = NSView(
+      frame: NSRect(x: 0, y: 0, width: Int(menuMinimumWidth), height: 22)
+    )
+    label.translatesAutoresizingMaskIntoConstraints = false
+    container.addSubview(label)
+
+    NSLayoutConstraint.activate([
+      label.leadingAnchor.constraint(
+        equalTo: container.leadingAnchor,
+        constant: 12
+      ),
+      label.trailingAnchor.constraint(
+        lessThanOrEqualTo: container.trailingAnchor,
+        constant: -8
+      ),
+      label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+      container.heightAnchor.constraint(equalToConstant: 22),
+    ])
+
+    return container
+  }
+
+  private func makeCategoryHeadingView(title: String) -> NSView {
+    let standardLeadingInset: CGFloat = 18
+    let rowHeight: CGFloat = 22
+
+    let label = NSTextField(labelWithString: title)
+    label.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
+    label.textColor = .secondaryLabelColor
+    label.alignment = .left
+    label.lineBreakMode = .byTruncatingTail
+
+    let container = NSView(
+      frame: NSRect(
+        x: 0,
+        y: 0,
+        width: Int(menuMinimumWidth),
+        height: Int(rowHeight)
+      )
+    )
+    label.translatesAutoresizingMaskIntoConstraints = false
+    container.addSubview(label)
+
+    NSLayoutConstraint.activate([
+      label.leadingAnchor.constraint(
+        equalTo: container.leadingAnchor,
+        constant: standardLeadingInset
+      ),
+      label.trailingAnchor.constraint(
+        lessThanOrEqualTo: container.trailingAnchor,
+        constant: -8
+      ),
+      label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+      container.heightAnchor.constraint(equalToConstant: rowHeight),
+    ])
+
+    return container
   }
 
   @objc private func didSelectTool(_ sender: NSMenuItem) {
@@ -158,43 +205,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
   }
 
   @objc private func showAbout() {
-    // If already open, just focus it.
-    if let controller = aboutWindowController {
-      controller.showWindow(nil)
-      NSApp.activate(ignoringOtherApps: true)
-      return
-    }
-
-    // Build the About window.
-    let size = NSSize(width: 380, height: 260)
-    let window = NSWindow(
-      contentRect: NSRect(origin: .zero, size: size),
-      styleMask: [.titled, .closable],
-      backing: .buffered,
-      defer: false
-    )
-    window.center()
-    window.title = "About \(appDisplayName)"
-    window.isReleasedWhenClosed = false
-
-    let view = AboutView()
-    let hosting = NSHostingView(
-      rootView: view.frame(minWidth: size.width, minHeight: size.height)
-    )
-    window.contentView = hosting
-
-    let controller = NSWindowController(window: window)
-    aboutWindowController = controller
-
-    NotificationCenter.default.addObserver(
-      forName: NSWindow.willCloseNotification,
-      object: window,
-      queue: .main
-    ) { [weak self] _ in
-      self?.aboutWindowController = nil
-    }
-
-    controller.showWindow(nil)
+    NSApp.orderFrontStandardAboutPanel(nil)
     NSApp.activate(ignoringOtherApps: true)
   }
 

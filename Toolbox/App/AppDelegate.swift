@@ -8,19 +8,33 @@
 import AppKit
 import SwiftUI
 
+@main
 final class AppDelegate: NSObject, NSApplicationDelegate {
   let registry = ToolRegistry()
   let presenter = ToolPresenter()
-  private var statusItemController: StatusItemController?
+  private var statusItemController: StatusItemController!
 
   private var welcomeWindowController: NSWindowController?
 
+  static func main() {
+    let app = NSApplication.shared
+    let delegate = AppDelegate()
+    app.delegate = delegate
+    app.run()
+  }
+
+  func applicationWillFinishLaunching(_ notification: Notification) {
+    NSApp.setActivationPolicy(.accessory)
+  }
+
   func applicationDidFinishLaunching(_ notification: Notification) {
     setupTools()
+
     statusItemController = StatusItemController(
       registry: registry,
       presenter: presenter
     )
+
     checkFirstLaunch()
   }
 
@@ -55,6 +69,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     window.title = "Welcome to Toolbox"
     window.center()
     window.isReleasedWhenClosed = false
+
+    window.titleVisibility = .hidden
+    window.titlebarAppearsTransparent = true
+    window.isMovableByWindowBackground = true
 
     let controller = NSWindowController(window: window)
     self.welcomeWindowController = controller

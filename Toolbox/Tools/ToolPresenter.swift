@@ -72,6 +72,9 @@ final class ToolPresenter: NSObject, NSWindowDelegate {
       defer: false
     )
     window.title = tool.name
+    window.titleVisibility = .visible
+    window.titlebarAppearsTransparent = true
+    window.isMovableByWindowBackground = true
     window.isReleasedWhenClosed = false
     window.delegate = self
     window.level = .normal
