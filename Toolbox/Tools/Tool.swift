@@ -14,7 +14,7 @@ protocol Tool: Identifiable {
   var name: String { get }
   var category: ToolCategory { get }
   var icon: String { get }
-  
+
   var presentationStyle: ToolPresentationStyle { get }
 
   func makeView(context: ToolContext) -> AnyView

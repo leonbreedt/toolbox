@@ -27,14 +27,14 @@ final class ToolPresenter: NSObject, NSWindowDelegate {
     case .window(let size, let resizable):
       let sizedView = AnyView(baseView.frame(minWidth: size.width, minHeight: size.height))
       let window = makeWindow(for: tool, view: sizedView, size: size, resizable: resizable)
-      
+
       register(window: window, forToolID: tool.id)
       bringWindowToFront(window)
 
     case .popover(let size):
       let sizedView = AnyView(baseView.frame(minWidth: size.width, minHeight: size.height))
       let window = makeWindow(for: tool, view: sizedView, size: size, resizable: false)
-      
+
       register(window: window, forToolID: tool.id)
       bringWindowToFront(window)
     }
@@ -42,10 +42,10 @@ final class ToolPresenter: NSObject, NSWindowDelegate {
 
   func dismiss(toolID: String) {
     guard let window = windowsByToolID[toolID] else { return }
-    
+
     window.delegate = nil
     window.close()
-    
+
     unregister(window: window)
   }
 
@@ -54,7 +54,7 @@ final class ToolPresenter: NSObject, NSWindowDelegate {
       window.delegate = nil
       window.close()
     }
-    
+
     windowsByToolID.removeAll()
     toolIDByWindow.removeAll()
   }
@@ -102,7 +102,7 @@ final class ToolPresenter: NSObject, NSWindowDelegate {
       windowsByToolID.removeValue(forKey: toolID)
     }
   }
-  
+
   private func bringWindowToFront(_ window: NSWindow) {
     NSApp.activate(ignoringOtherApps: true)
 
@@ -120,7 +120,7 @@ final class ToolPresenter: NSObject, NSWindowDelegate {
 
   func windowWillClose(_ notification: Notification) {
     guard let window = notification.object as? NSWindow else { return }
-    
+
     unregister(window: window)
   }
 }
