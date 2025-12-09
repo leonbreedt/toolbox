@@ -1,7 +1,7 @@
 //
 //  Toolbox
 //
-//  Copyright (C) 2025-2026 Sector 42 Limited
+//  Copyright (C) 2025-2026 Leon Breedt
 //  All Rights Reserved
 //
 

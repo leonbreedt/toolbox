@@ -262,7 +262,7 @@
 				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_LSBackgroundOnly = NO;
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "©️ 2025-2026 Sector 42 Limited";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "©️ 2025-2026 Leon Breedt";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -297,7 +297,7 @@
 				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_LSBackgroundOnly = NO;
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "©️ 2025-2026 Sector 42 Limited";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "©️ 2025-2026 Leon Breedt";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
