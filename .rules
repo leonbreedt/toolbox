@@ -1,0 +1,24 @@
+# Swift coding guidelines
+
+* Prioritize code correctness and clarity. Speed and efficiency are secondary priorities unless otherwise specified.
+* Do not write organizational or comments that summarize the code. Comments should only be written in order to explain "why" the code is written in some way in the case there is a reason that is tricky / non-obvious.
+* Prefer implementing functionality in existing files unless it is a new logical component. Avoid creating many small files.
+* Avoid using force unwrapping (`!`) unless absolutely necessary, prefer optional chaining and guards.
+* Be careful with operations like indexing which may panic if the indexes are out of bounds.
+* Never silently discard errors with `let _ =` on fallible operations. Always handle errors appropriately:
+  - Propagate errors with `throws` when the calling function should handle them
+  - Use explicit error handling with `do..catch` or `try?` when you need custom logic
+* When implementing async operations that may fail, ensure errors propagate to the UI layer so users get meaningful feedback.
+* Avoid creative additions unless explicitly requested
+* Use full words for variable names (no abbreviations like "q" for "queue")
+
+# Framework usage
+
+* Prefer using SwiftUI over AppKit, but use AppKit if it is the only way to build the desired functionality.
+* This is only a macOS application, do not try to support other platforms like iOS or iPadOS.
+
+# Concurrency
+
+* Use the most modern concurrency approaches for Swift 6 (`@MainActor`, `async/await`, and `actor`)
+* Prefer `@Observable` over `ObservableObject/@Published` unless `ObservableObject/@Published` would be cleaner/simpler
+* Prefer using tasks to perform async work for views with `.onAppear` or `.task`
