@@ -1,5 +1,3 @@
-name: Build macOS DMG
-
 on:
   push:
     branches: [ main ]
