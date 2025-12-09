@@ -14,7 +14,9 @@ struct JWTDecoderTool: @MainActor Tool {
   let category = ToolCategory.development
   let icon = "lock.open"
   let presentationStyle = ToolPresentationStyle.window(
-    size: CGSize(width: 600, height: 620), resizable: true)
+    size: CGSize(width: 600, height: 620),
+    resizable: true
+  )
 
   func makeView(context: ToolContext) -> AnyView {
     AnyView(JWTDecoderView(context: context))
@@ -28,19 +30,15 @@ struct JWTDecoderView: View {
   @State private var headerPretty: String = ""
   @State private var payloadPretty: String = ""
   @State private var signatureBase64URL: String = ""
-  @State private var signatureBytes: Int = 0
   @State private var errorMessage: String?
 
-  // Editable JSON text for header and payload
   @State private var headerJSONText: String = ""
   @State private var payloadJSONText: String = ""
 
-  // Guard flags to avoid feedback loops when updating programmatically
   @State private var isProgrammaticInputUpdate = false
   @State private var isProgrammaticHeaderUpdate = false
   @State private var isProgrammaticPayloadUpdate = false
 
-  // Keep observer tokens to remove them on disappear
   @State private var appActiveObserver: NSObjectProtocol?
   @State private var windowKeyObserver: NSObjectProtocol?
 
@@ -50,7 +48,6 @@ struct JWTDecoderView: View {
     self._input = State(initialValue: saved ?? "")
   }
 
-  // Custom colors
   private var headerColor: Color { Color(hex: "#2B5F55") }
   private var payloadColor: Color { .black }
   private var signatureColor: Color { Color(hex: "#2F3D9A") }
@@ -61,7 +58,9 @@ struct JWTDecoderView: View {
       HStack {
         Button {
           if let paste = NSPasteboard.general.string(forType: .string) {
-            input = paste.trimmingCharacters(in: .whitespacesAndNewlines)
+            input = paste.trimmingCharacters(
+              in: .whitespacesAndNewlines
+            )
             context.save(input, forKey: "input")
             decode()
           }
@@ -89,11 +88,13 @@ struct JWTDecoderView: View {
         .buttonStyle(.borderedProminent)
       }
 
-      // Input (colorized while editing)
       GroupBox("Encoded JWT") {
         ColorizedTextEditor(
           text: $input,
-          font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+          font: NSFont.monospacedSystemFont(
+            ofSize: 13,
+            weight: .regular
+          ),
           headerColor: NSColor(headerColor),
           payloadColor: NSColor(payloadColor),
           signatureColor: NSColor(signatureColor)
@@ -118,7 +119,6 @@ struct JWTDecoderView: View {
         .font(.callout)
       }
 
-      // Editable Output
       HStack(spacing: 12) {
         GroupBox("Header") {
           TextEditor(text: $headerJSONText)
@@ -152,44 +152,15 @@ struct JWTDecoderView: View {
             }
         }
       }
-
-      GroupBox("Signature") {
-        HStack(alignment: .firstTextBaseline) {
-          Text(signatureBase64URL.isEmpty ? "—" : signatureBase64URL)
-            .font(.system(.body, design: .monospaced))  // Match header/payload font
-            .foregroundStyle(signatureColor)
-            .textSelection(.enabled)
-            .lineLimit(2)
-            .truncationMode(.middle)
-          Spacer()
-          if signatureBytes > 0 {
-            Text("\(signatureBytes) bytes")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-          }
-          Button {
-            if !signatureBase64URL.isEmpty {
-              NSPasteboard.general.clearContents()
-              NSPasteboard.general.setString(signatureBase64URL, forType: .string)
-            }
-          } label: {
-            Image(systemName: "doc.on.doc")
-          }
-          .buttonStyle(.bordered)
-          .controlSize(.small)
-          .disabled(signatureBase64URL.isEmpty)
-        }
-      }
     }
     .padding(12)
     .onAppear {
-      // Initial decode if we already have input
       if !input.isEmpty {
         decode()
       } else {
         autoImportFromClipboardIfJWT()
       }
-      // Observe app activation (foreground)
+
       appActiveObserver = NotificationCenter.default.addObserver(
         forName: NSApplication.didBecomeActiveNotification,
         object: nil,
@@ -197,7 +168,7 @@ struct JWTDecoderView: View {
       ) { _ in
         autoImportFromClipboardIfJWT()
       }
-      // Observe window focus (becoming key)
+
       windowKeyObserver = NotificationCenter.default.addObserver(
         forName: NSWindow.didBecomeKeyNotification,
         object: nil,
@@ -222,7 +193,6 @@ struct JWTDecoderView: View {
     headerPretty = ""
     payloadPretty = ""
     signatureBase64URL = ""
-    signatureBytes = 0
     errorMessage = nil
     headerJSONText = ""
     payloadJSONText = ""
@@ -230,6 +200,7 @@ struct JWTDecoderView: View {
 
   private func decode() {
     clearOutput()
+
     let token = input.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !token.isEmpty else { return }
 
@@ -243,86 +214,89 @@ struct JWTDecoderView: View {
     let payloadPart = parts[1]
     let signaturePart = parts[2]
 
-    // Decode header
     do {
       let headerData = try decodeBase64URL(headerPart)
       let pretty =
-        prettyPrintedJSON(from: headerData) ?? String(data: headerData, encoding: .utf8)
+        prettyPrintedJSON(from: headerData) ?? String(
+          data: headerData,
+          encoding: .utf8
+        )
         ?? "(binary)"
       headerPretty = pretty
       if let jsonString = String(data: headerData, encoding: .utf8) {
         isProgrammaticHeaderUpdate = true
-        headerJSONText = prettyPrintedJSONString(fromString: jsonString) ?? jsonString
+        headerJSONText =
+          prettyPrintedJSONString(fromString: jsonString)
+          ?? jsonString
         isProgrammaticHeaderUpdate = false
       }
     } catch {
       errorMessage = "Header decode error: \(error.localizedDescription)"
     }
 
-    // Decode payload
     do {
       let payloadData = try decodeBase64URL(payloadPart)
       let pretty =
-        prettyPrintedJSON(from: payloadData) ?? String(data: payloadData, encoding: .utf8)
+        prettyPrintedJSON(from: payloadData) ?? String(
+          data: payloadData,
+          encoding: .utf8
+        )
         ?? "(binary)"
       payloadPretty = pretty
       if let jsonString = String(data: payloadData, encoding: .utf8) {
         isProgrammaticPayloadUpdate = true
-        payloadJSONText = prettyPrintedJSONString(fromString: jsonString) ?? jsonString
+        payloadJSONText =
+          prettyPrintedJSONString(fromString: jsonString)
+          ?? jsonString
         isProgrammaticPayloadUpdate = false
       }
     } catch {
       let msg = "Payload decode error: \(error.localizedDescription)"
-      errorMessage = errorMessage == nil ? msg : "\(errorMessage!) • \(msg)"
+      errorMessage =
+        errorMessage == nil ? msg : "\(errorMessage!) • \(msg)"
     }
 
-    // Signature (keep base64url as-is, but compute raw bytes)
     signatureBase64URL = signaturePart
-    if let bytes = try? decodeBase64URL(signaturePart) {
-      signatureBytes = bytes.count
-    } else {
-      signatureBytes = 0
-    }
   }
 
   private func rebuildTokenFromEditedParts() {
-    // Parse edited JSON. If either side is invalid JSON, do not update token.
-    guard let headerData = jsonData(from: headerJSONText),
-      let payloadData = jsonData(from: payloadJSONText)
+    guard let headerData = jsonData(from: headerJSONText)
     else {
-      errorMessage = "Edited header or payload is not valid JSON."
+      errorMessage = "Header is not valid JSON."
+      return
+    }
+    guard let payloadData = jsonData(from: payloadJSONText)
+    else {
+      errorMessage = "Payload is not valid JSON."
       return
     }
 
-    // Base64URL-encode both parts
     let headerB64 = base64URLEncode(headerData)
     let payloadB64 = base64URLEncode(payloadData)
 
-    // Keep the existing signature (may be invalid cryptographically, but user requested to keep it)
-    let rebuilt = [headerB64, payloadB64, signatureBase64URL].joined(separator: ".")
+    // NOTE: signature may become invalid when header/payload changes
+    let rebuilt = [headerB64, payloadB64, signatureBase64URL].joined(
+      separator: "."
+    )
 
-    // Update input programmatically to avoid recursion and trigger decode
     isProgrammaticInputUpdate = true
     input = rebuilt
     context.save(input, forKey: "input")
     isProgrammaticInputUpdate = false
 
-    // Maintain signature info
-    if let bytes = try? decodeBase64URL(signatureBase64URL) {
-      signatureBytes = bytes.count
-    } else {
-      signatureBytes = 0
-    }
-
-    // Update pretty strings
     headerPretty =
-      prettyPrintedJSONString(fromData: headerData) ?? String(data: headerData, encoding: .utf8)
+      prettyPrintedJSONString(fromData: headerData) ?? String(
+        data: headerData,
+        encoding: .utf8
+      )
       ?? ""
     payloadPretty =
-      prettyPrintedJSONString(fromData: payloadData) ?? String(data: payloadData, encoding: .utf8)
+      prettyPrintedJSONString(fromData: payloadData) ?? String(
+        data: payloadData,
+        encoding: .utf8
+      )
       ?? ""
 
-    // Clear transient error if JSON is valid
     errorMessage = nil
   }
 
@@ -349,7 +323,8 @@ struct JWTDecoderView: View {
   }
 
   private func decodeBase64URL(_ s: String) throws -> Data {
-    var base = s.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+    var base = s.replacingOccurrences(of: "-", with: "+")
+      .replacingOccurrences(of: "_", with: "/")
     let rem = base.count % 4
     if rem == 2 {
       base.append("==")
@@ -357,13 +332,19 @@ struct JWTDecoderView: View {
       base.append("=")
     } else if rem == 1 {
       throw NSError(
-        domain: "JWTDecoder", code: 1,
-        userInfo: [NSLocalizedDescriptionKey: "Invalid base64url length"])
+        domain: "JWTDecoder",
+        code: 1,
+        userInfo: [
+          NSLocalizedDescriptionKey: "Invalid base64url length"
+        ]
+      )
     }
     guard let data = Data(base64Encoded: base) else {
       throw NSError(
-        domain: "JWTDecoder", code: 2,
-        userInfo: [NSLocalizedDescriptionKey: "Invalid base64url data"])
+        domain: "JWTDecoder",
+        code: 2,
+        userInfo: [NSLocalizedDescriptionKey: "Invalid base64url data"]
+      )
     }
     return data
   }
@@ -372,7 +353,9 @@ struct JWTDecoderView: View {
     do {
       let obj = try JSONSerialization.jsonObject(with: data, options: [])
       let pretty = try JSONSerialization.data(
-        withJSONObject: obj, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+        withJSONObject: obj,
+        options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+      )
       return String(data: pretty, encoding: .utf8)
     } catch {
       return nil
@@ -389,10 +372,12 @@ struct JWTDecoderView: View {
   }
 
   private func jsonData(from s: String) -> Data? {
-    // Accept either minified or pretty JSON
     guard let data = s.data(using: .utf8) else { return nil }
     do {
-      let obj = try JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed])
+      let obj = try JSONSerialization.jsonObject(
+        with: data,
+        options: [.fragmentsAllowed]
+      )
       return try JSONSerialization.data(withJSONObject: obj, options: [])
     } catch {
       return nil
@@ -439,12 +424,13 @@ struct ColorizedTextEditor: NSViewRepresentable {
     textView.isVerticallyResizable = true
     textView.autoresizingMask = [.width]
     textView.textContainer?.containerSize = NSSize(
-      width: scrollView.contentSize.width, height: .greatestFiniteMagnitude)
+      width: scrollView.contentSize.width,
+      height: .greatestFiniteMagnitude
+    )
     textView.textContainer?.widthTracksTextView = true
 
     scrollView.documentView = textView
 
-    // Initial content
     textView.string = text
     context.coordinator.applyHighlight(in: textView)
 
@@ -452,7 +438,9 @@ struct ColorizedTextEditor: NSViewRepresentable {
   }
 
   func updateNSView(_ scrollView: NSScrollView, context: Context) {
-    guard let textView = scrollView.documentView as? NSTextView else { return }
+    guard let textView = scrollView.documentView as? NSTextView else {
+      return
+    }
     if textView.string != text {
       context.coordinator.isProgrammaticChange = true
       let selected = textView.selectedRange()
@@ -491,16 +479,19 @@ struct ColorizedTextEditor: NSViewRepresentable {
         .foregroundColor: NSColor.labelColor,
       ]
 
-      // Reset base attributes
       storage.setAttributes(baseAttrs, range: fullRange)
 
-      // Compute ranges for header.payload.signature, leaving dots default-colored
       let s = textView.string as NSString
       let string = s as String
       if string.isEmpty { return }
 
-      let parts = string.split(separator: ".", maxSplits: 2, omittingEmptySubsequences: false).map(
-        String.init)
+      let parts = string.split(
+        separator: ".",
+        maxSplits: 2,
+        omittingEmptySubsequences: false
+      ).map(
+        String.init
+      )
       var loc = 0
 
       for (idx, part) in parts.enumerated() {
@@ -513,9 +504,12 @@ struct ColorizedTextEditor: NSViewRepresentable {
           default: color = parent.signatureColor
           }
           storage.addAttributes(
-            [.foregroundColor: color], range: NSRange(location: loc, length: len))
+            [.foregroundColor: color],
+            range: NSRange(location: loc, length: len)
+          )
         }
         loc += len
+
         // Skip the dot between parts (keeps default color)
         if idx < parts.count - 1 {
           loc += 1
@@ -534,12 +528,13 @@ extension NSRange {
   }
 }
 
-// MARK: - Hex Color convenience
-
 extension Color {
   fileprivate init(hex: String) {
-    let hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(
-      of: "#", with: "")
+    let hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+      .replacingOccurrences(
+        of: "#",
+        with: ""
+      )
     var int: UInt64 = 0
     Scanner(string: hexString).scanHexInt64(&int)
     let r = Double((int >> 16) & 0xFF) / 255.0
