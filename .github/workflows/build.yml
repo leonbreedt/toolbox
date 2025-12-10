@@ -102,8 +102,17 @@ jobs:
           --apple-id "$APPLE_ID" \
           --password "$APPLE_APP_SPECIFIC_PASSWORD" \
           --team-id "$APPLE_TEAM_ID" \
+          --verbose \
           --output-format json \
-          --wait
+          --wait > notarization.json
+
+        SUBMISSION_ID=$(jq -r '.id' notarization.json)
+
+        # Print log
+        xcrun notarytool log "$SUBMISSION_ID" \
+          --apple-id "$APPLE_ID" \
+          --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+          --team-id "$APPLE_TEAM_ID"
 
         # Wait a bit for the ticket to propagate
         sleep 10
