@@ -11,7 +11,7 @@
 * When implementing async operations that may fail, ensure errors propagate to the UI layer so users get meaningful feedback.
 * Avoid creative additions unless explicitly requested
 * Use full words for variable names (no abbreviations like "q" for "queue")
-* Update the change log for bug fixes or high level feature additions, be concise, as the audience is end-users.
+* Update the [CHANGELOG.md](CHANGELOG.md) file for bug fixes or high level feature additions, be concise, as the audience is end-users.
 
 # Framework usage
 
