@@ -102,6 +102,7 @@ jobs:
           --apple-id "$APPLE_ID" \
           --password "$APPLE_APP_SPECIFIC_PASSWORD" \
           --team-id "$APPLE_TEAM_ID" \
+          --output-format json \
           --wait
 
         # Wait a bit for the ticket to propagate
