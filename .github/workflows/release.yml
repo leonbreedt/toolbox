@@ -1,13 +1,9 @@
-name: Build
+name: Release
 
 on:
   push:
-    branches: [ main ]
     tags:
       - 'v*'
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -28,7 +24,6 @@ jobs:
         xcode-version: '26.1.1'
 
     - name: Prepare signing certificates and provisioning profiles
-      if: github.event_name != 'pull_request'
       env:
         BUILD_CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE }}
         BUILD_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -47,8 +42,8 @@ jobs:
         security import $CERTIFICATE_PATH -P "$BUILD_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH >/dev/null 2>&1
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH >/dev/null 2>&1
         security list-keychain -d user -s $KEYCHAIN_PATH
-    - name: Build
-      if: github.event_name != 'pull_request'
+
+    - name: Build App
       env:
         DEVELOPMENT_TEAM: ${{ secrets.APPLE_TEAM_ID }}
       run: |
@@ -65,19 +60,6 @@ jobs:
           -archivePath Toolbox.xcarchive \
           -exportPath Release \
           -exportOptionsPlist Toolbox/export.plist
-
-    - name: Build (PRs)
-      if: github.event_name == 'pull_request'
-      run: |
-        xcodebuild -project Toolbox.xcodeproj \
-          -scheme Toolbox \
-          -configuration Debug \
-          -derivedDataPath ./build \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          DEVELOPMENT_TEAM="" \
-          CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO
 
     - name: Create DMG
       run: |
@@ -97,10 +79,8 @@ jobs:
         APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       run: |
-        # Sign the DMG
         codesign --sign "Developer ID Application" --force --options runtime --timestamp Toolbox.dmg
 
-        # Submit DMG for notarization
         xcrun notarytool submit Toolbox.dmg \
           --apple-id "$APPLE_ID" \
           --password "$APPLE_APP_SPECIFIC_PASSWORD" \
@@ -111,53 +91,38 @@ jobs:
 
         SUBMISSION_ID=$(jq -r '.id' notarization.json)
 
-        # Print log
         xcrun notarytool log "$SUBMISSION_ID" \
           --apple-id "$APPLE_ID" \
           --password "$APPLE_APP_SPECIFIC_PASSWORD" \
           --team-id "$APPLE_TEAM_ID"
 
-        # Wait a bit for the ticket to propagate
         sleep 10
 
-        # Staple the notarization ticket to DMG
         xcrun stapler staple Toolbox.dmg
 
-    - name: Upload DMG artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Toolbox-dmg
-        path: Toolbox.dmg
-        retention-days: 90
-
-    - name: Get version from tag
-      if: startsWith(github.ref, 'refs/tags/v')
+    - name: Read version from tag
       id: version
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
     - name: Install Sparkle tools
-      if: startsWith(github.ref, 'refs/tags/v')
       run: |
         curl -L https://github.com/sparkle-project/Sparkle/releases/download/2.8.1/Sparkle-2.8.1.tar.xz -o sparkle.tar.xz
         tar -xf sparkle.tar.xz
         chmod +x bin/generate_appcast bin/sign_update
 
-    - name: Restore Sparkle private key
-      if: startsWith(github.ref, 'refs/tags/v')
+    - name: Retrieve Sparkle private key
       env:
         SPARKLE_EDDSA_KEY: ${{ secrets.SPARKLE_EDDSA_KEY }}
       run: |
         echo "$SPARKLE_EDDSA_KEY" > sparkle_key
 
-    - name: Get DMG information
-      if: startsWith(github.ref, 'refs/tags/v')
+    - name: Read DMG size
       id: dmg_info
       run: |
         DMG_SIZE=$(stat -f%z Toolbox.dmg)
         echo "DMG_SIZE=$DMG_SIZE" >> $GITHUB_OUTPUT
 
     - name: Create GitHub Release
-      if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v1
       with:
         files: Toolbox.dmg
@@ -167,14 +132,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Sign DMG for Sparkle
-      if: startsWith(github.ref, 'refs/tags/v')
       run: |
         SIGNATURE=$(./bin/sign_update Toolbox.dmg -f sparkle_key)
         echo "SPARKLE_SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
         echo "Sparkle signature: $SIGNATURE"
 
-    - name: Update appcast
-      if: startsWith(github.ref, 'refs/tags/v')
+    - name: Update Sparkle appcast
       run: |
         export DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.VERSION }}/Toolbox.dmg"
 
@@ -204,8 +167,7 @@ jobs:
 
         cat docs/appcast.xml
 
-    - name: Deploy to GitHub Pages
-      if: startsWith(github.ref, 'refs/tags/v')
+    - name: Deploy Sparkle appcast to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
