@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
-<rss version="2.0">
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
   <channel>
     <title>Toolbox</title>
     <link>https://leonbreedt.github.io/toolbox/appcast.xml</link>
     <description>Most recent updates to Toolbox</description>
     <language>en</language>
-  <item><title>Version 1.0.6</title><pubDate>Wed, 10 Dec 2025 04:49:16 +0000</pubDate><enclosure url="https://github.com/leonbreedt/toolbox/releases/download/v1.0.6/Toolbox.dmg" length="1127712" type="application/octet-stream" sparkle:version="1.0.6" sparkle:shortVersionString="1.0.6" sparkle:edSignature="flOXJb1/iXU0DD46d+uZ3wlpKQFMK/2EOK0f+WKIB/8fiJRI+qlNqrjxS+G38guO81Hbid08Uucjt/NVE2h2BA==" /></item></channel>
+  <item><title>Version 1.0.7</title><pubDate>Wed, 10 Dec 2025 05:08:15 +0000</pubDate><enclosure url="https://github.com/leonbreedt/toolbox/releases/download/v1.0.7/Toolbox.dmg" length="1334090" type="application/octet-stream" sparkle:version="1.0.7" sparkle:shortVersionString="1.0.7" sparkle:edSignature="etxRnawDFjrtwdfBJWX166BChHdDnhM/FTyZC+GEE8NQLl6Hv6uiArFSJ7M0DQgX4p0p1EdSu+VxNaoODL0zCA==" /></item></channel>
 </rss>
