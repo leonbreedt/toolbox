@@ -9,10 +9,5 @@
 	<string>Developer ID Application</string>
 	<key>signingStyle</key>
 	<string>manual</string>
-	<key>provisioningProfiles</key>
-	<dict>
-		<key>io.sector42.Toolbox</key>
-		<string>Toolbox Provisioning Profile</string>
-	</dict>
 </dict>
 </plist>
