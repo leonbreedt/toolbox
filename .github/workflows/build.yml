@@ -83,7 +83,7 @@ jobs:
       run: |
         mkdir -p dmg_contents
 
-        cp -r ./Release/Toolbox.app dmg_contents/
+        mv ./Release/Toolbox.app dmg_contents/
 
         hdiutil create -volname "Toolbox" \
           -srcfolder dmg_contents \
