@@ -14,9 +14,22 @@
 		35F3B3A62EE7BEA300D8E570 /* Toolbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Toolbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		356DD7EE2EE915C100A8EC37 /* Exceptions for "Toolbox" folder in "Toolbox" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/Info.plist,
+			);
+			target = 35F3B3A52EE7BEA300D8E570 /* Toolbox */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		35F3B3A82EE7BEA300D8E570 /* Toolbox */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				356DD7EE2EE915C100A8EC37 /* Exceptions for "Toolbox" folder in "Toolbox" target */,
+			);
 			path = Toolbox;
 			sourceTree = "<group>";
 		};
@@ -269,17 +282,15 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "";
+				INFOPLIST_FILE = Toolbox/Resources/Info.plist;
 				INFOPLIST_KEY_LSBackgroundOnly = NO;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "©️ 2025-2026 Leon Breedt";
-				INFOPLIST_KEY_SUFeedURL = "https://leonbreedt.github.io/toolbox/appcast.xml";
-				INFOPLIST_KEY_SUPublicEDKey = "PVJHQ41tyAxwPRuzumr7mg9V3+EAGxXt2zQtPQvQ2R4=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = io.sector42.Toolbox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -307,17 +318,15 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "";
+				INFOPLIST_FILE = Toolbox/Resources/Info.plist;
 				INFOPLIST_KEY_LSBackgroundOnly = NO;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "©️ 2025-2026 Leon Breedt";
-				INFOPLIST_KEY_SUFeedURL = "https://leonbreedt.github.io/toolbox/appcast.xml";
-				INFOPLIST_KEY_SUPublicEDKey = "PVJHQ41tyAxwPRuzumr7mg9V3+EAGxXt2zQtPQvQ2R4=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = io.sector42.Toolbox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
