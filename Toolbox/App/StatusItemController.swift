@@ -6,20 +6,23 @@
 //
 
 import AppKit
+import Sparkle
 import SwiftUI
 
 final class StatusItemController: NSObject, NSMenuDelegate {
   private let registry: ToolRegistry
   private let presenter: ToolPresenter
+  private weak var updater: SPUUpdater?
 
   private let statusItem: NSStatusItem
   private let menu = NSMenu()
 
   private let menuMinimumWidth: CGFloat = 240
 
-  init(registry: ToolRegistry, presenter: ToolPresenter) {
+  init(registry: ToolRegistry, presenter: ToolPresenter, updater: SPUUpdater? = nil) {
     self.registry = registry
     self.presenter = presenter
+    self.updater = updater
     self.statusItem = NSStatusBar.system.statusItem(
       withLength: NSStatusItem.variableLength
     )
@@ -110,6 +113,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     if !categoriesWithTools.isEmpty {
       menu.addItem(.separator())
     }
+
+    let checkForUpdatesItem = NSMenuItem(
+      title: "Check for Updates…",
+      action: #selector(checkForUpdates),
+      keyEquivalent: ""
+    )
+    checkForUpdatesItem.target = self
+    menu.addItem(checkForUpdatesItem)
 
     let aboutTitle = "About"
     let aboutItem = NSMenuItem(
@@ -202,6 +213,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
       return
     }
     presenter.present(tool)
+  }
+
+  @objc private func checkForUpdates() {
+    updater?.checkForUpdates()
   }
 
   @objc private func showAbout() {

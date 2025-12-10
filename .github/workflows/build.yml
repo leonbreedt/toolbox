@@ -11,6 +11,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -133,6 +135,46 @@ jobs:
         path: Toolbox.dmg
         retention-days: 90
 
+    - name: Get version from tag
+      if: startsWith(github.ref, 'refs/tags/v')
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Install Sparkle tools
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        curl -L https://github.com/sparkle-project/Sparkle/releases/download/2.8.1/Sparkle-2.8.1.tar.xz -o sparkle.tar.xz
+        tar -xf sparkle.tar.xz
+        chmod +x bin/generate_appcast bin/sign_update
+
+    - name: Generate EdDSA key pair (first release only)
+      if: startsWith(github.ref, 'refs/tags/v') && github.event_name != 'pull_request'
+      run: |
+        if [ ! -f "$HOME/.sparkle_eddsa_key" ]; then
+          ./bin/generate_keys > "$HOME/.sparkle_eddsa_key"
+          echo "New EdDSA key pair generated. Save this in GitHub Secrets as SPARKLE_EDDSA_KEY!"
+          cat "$HOME/.sparkle_eddsa_key"
+        fi
+
+    - name: Restore EdDSA private key
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        SPARKLE_EDDSA_KEY: ${{ secrets.SPARKLE_EDDSA_KEY }}
+      run: |
+        if [ -n "$SPARKLE_EDDSA_KEY" ]; then
+          echo "$SPARKLE_EDDSA_KEY" > sparkle_key
+        else
+          echo "Warning: SPARKLE_EDDSA_KEY not set. Using generated key."
+          cp "$HOME/.sparkle_eddsa_key" sparkle_key
+        fi
+
+    - name: Get DMG information
+      if: startsWith(github.ref, 'refs/tags/v')
+      id: dmg_info
+      run: |
+        DMG_SIZE=$(stat -f%z Toolbox.dmg)
+        echo "DMG_SIZE=$DMG_SIZE" >> $GITHUB_OUTPUT
+
     - name: Create GitHub Release
       if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v1
@@ -142,3 +184,49 @@ jobs:
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Sign DMG for Sparkle
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        SIGNATURE=$(./bin/sign_update Toolbox.dmg -f sparkle_key)
+        echo "SPARKLE_SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
+        echo "Sparkle signature: $SIGNATURE"
+
+    - name: Update appcast
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.VERSION }}/Toolbox.dmg"
+
+        python3 << 'EOF'
+        import xml.etree.ElementTree as ET
+        from datetime import datetime
+        import os
+
+        tree = ET.parse('docs/appcast.xml')
+        root = tree.getroot()
+        channel = root.find('channel')
+
+        item = ET.SubElement(channel, 'item')
+        ET.SubElement(item, 'title').text = f"Version ${{ steps.version.outputs.VERSION }}"
+        ET.SubElement(item, 'pubDate').text = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S +0000')
+
+        enclosure = ET.SubElement(item, 'enclosure')
+        enclosure.set('url', os.environ['DOWNLOAD_URL'])
+        enclosure.set('length', '${{ steps.dmg_info.outputs.DMG_SIZE }}')
+        enclosure.set('type', 'application/octet-stream')
+        enclosure.set('sparkle:version', '${{ steps.version.outputs.VERSION }}')
+        enclosure.set('sparkle:shortVersionString', '${{ steps.version.outputs.VERSION }}')
+        enclosure.set('sparkle:edSignature', os.environ['SPARKLE_SIGNATURE'])
+
+        tree.write('docs/appcast.xml', encoding='utf-8', xml_declaration=True)
+        EOF
+
+        cat docs/appcast.xml
+
+    - name: Deploy to GitHub Pages
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        publish_branch: gh-pages

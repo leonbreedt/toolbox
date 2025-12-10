@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import Sparkle
 import SwiftUI
 
 @main
@@ -13,8 +14,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   let registry = ToolRegistry()
   let presenter = ToolPresenter()
   private var statusItemController: StatusItemController!
+  private let updaterController: SPUStandardUpdaterController
 
   private var welcomeWindowController: NSWindowController?
+
+  override init() {
+    updaterController = SPUStandardUpdaterController(
+      startingUpdater: true,
+      updaterDelegate: nil,
+      userDriverDelegate: nil
+    )
+    super.init()
+  }
 
   static func main() {
     let app = NSApplication.shared
@@ -32,7 +43,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     statusItemController = StatusItemController(
       registry: registry,
-      presenter: presenter
+      presenter: presenter,
+      updater: updaterController.updater
     )
 
     checkFirstLaunch()
