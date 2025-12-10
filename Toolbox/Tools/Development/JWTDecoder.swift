@@ -313,7 +313,6 @@ struct JWTDecoderView: View {
     decode()
   }
 
-  // Quick structural validation that the string is a JWT:
   private func looksLikeJWT(_ token: String) -> Bool {
     let parts = token.split(separator: ".")
     guard parts.count == 3 else { return false }
