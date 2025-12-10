@@ -95,6 +95,14 @@ jobs:
           -ov -format UDZO \
           Toolbox.dmg
 
+    - name: Upload pre-notarization DMG artifact
+      if: github.event_name != 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: Toolbox-dmg-pre-notarization
+        path: Toolbox.dmg
+        retention-days: 7
+
     - name: Sign and notarize DMG
       if: github.event_name != 'pull_request'
       env:
