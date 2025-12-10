@@ -85,16 +85,16 @@ jobs:
           --apple-id "$APPLE_ID" \
           --password "$APPLE_APP_SPECIFIC_PASSWORD" \
           --team-id "$APPLE_TEAM_ID" \
-          --verbose \
           --output-format json \
           --wait > notarization.json
 
         SUBMISSION_ID=$(jq -r '.id' notarization.json)
 
-        xcrun notarytool log "$SUBMISSION_ID" \
-          --apple-id "$APPLE_ID" \
-          --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-          --team-id "$APPLE_TEAM_ID"
+        # uncomment if issues occur during notarization
+        # xcrun notarytool log "$SUBMISSION_ID" \
+        #  --apple-id "$APPLE_ID" \
+        #  --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+        #  --team-id "$APPLE_TEAM_ID"
 
         sleep 10
 
@@ -133,9 +133,11 @@ jobs:
 
     - name: Sign DMG for Sparkle
       run: |
-        SIGNATURE=$(./bin/sign_update Toolbox.dmg -f sparkle_key)
+        OUTPUT=$(./bin/sign_update Toolbox.dmg -f sparkle_key)
+        SIGNATURE=$(echo "$OUTPUT" | grep -o 'sparkle:edSignature="[^"]*"' | cut -d'"' -f2)
+        LENGTH=$(echo "$OUTPUT" | grep -o 'length="[^"]*"' | cut -d'"' -f2)
         echo "SPARKLE_SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
-        echo "Sparkle signature: $SIGNATURE"
+        echo "SPARKLE_LENGTH=$LENGTH" >> $GITHUB_ENV
 
     - name: Update Sparkle appcast
       run: |
@@ -156,7 +158,7 @@ jobs:
 
         enclosure = ET.SubElement(item, 'enclosure')
         enclosure.set('url', os.environ['DOWNLOAD_URL'])
-        enclosure.set('length', '${{ steps.dmg_info.outputs.DMG_SIZE }}')
+        enclosure.set('length', os.environ['SPARKLE_LENGTH'])
         enclosure.set('type', 'application/octet-stream')
         enclosure.set('sparkle:version', '${{ steps.version.outputs.VERSION }}')
         enclosure.set('sparkle:shortVersionString', '${{ steps.version.outputs.VERSION }}')
