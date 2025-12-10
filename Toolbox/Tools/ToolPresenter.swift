@@ -65,7 +65,7 @@ final class ToolPresenter: NSObject, NSWindowDelegate {
     let baseMask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable]
     let styleMask: NSWindow.StyleMask = resizable ? baseMask.union(.resizable) : baseMask
 
-    let window = NSWindow(
+    let window = ToolWindow(
       contentRect: NSRect(x: 0, y: 0, width: size.width, height: size.height),
       styleMask: styleMask,
       backing: .buffered,
