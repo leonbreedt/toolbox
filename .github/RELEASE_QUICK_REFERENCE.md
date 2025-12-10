@@ -1,7 +1,5 @@
 # Quick Release Reference
 
-A condensed guide for creating releases. For full details, see [RELEASE_PROCESS.md](RELEASE_PROCESS.md).
-
 ## Quick Release Steps
 
 ```bash
@@ -31,23 +29,6 @@ git push origin v1.0.4
 ✅ Update appcast feed
 ✅ Deploy to GitHub Pages
 
-## First Release Only
-
-Set up the Sparkle EdDSA key:
-
-```bash
-# Generate key pair
-curl -L https://github.com/sparkle-project/Sparkle/releases/download/2.8.1/Sparkle-2.8.1.tar.xz -o sparkle.tar.xz
-tar -xf sparkle.tar.xz
-./bin/generate_keys
-
-# Add private key to GitHub Secrets as SPARKLE_EDDSA_KEY
-# Add public key to Xcode build settings as INFOPLIST_KEY_SUPublicEDKey
-```
-
-Enable GitHub Pages:
-- Settings → Pages → Source: gh-pages branch, / (root)
-
 ## Troubleshooting
 
 | Issue | Solution |
@@ -55,18 +36,3 @@ Enable GitHub Pages:
 | No updates detected | Check SUFeedURL in Info.plist and verify appcast is accessible |
 | Workflow fails | Check GitHub Actions logs; ensure all secrets are set |
 | Notarization fails | Verify Apple ID, app-specific password, and team ID |
-
-## Required Secrets
-
-- `MACOS_CERTIFICATE` - Base64 encoded P12 certificate
-- `MACOS_CERTIFICATE_PASSWORD` - P12 password
-- `KEYCHAIN_PASSWORD` - Temporary keychain password
-- `APPLE_ID` - Apple ID email
-- `APPLE_APP_SPECIFIC_PASSWORD` - App-specific password
-- `APPLE_TEAM_ID` - Team ID
-- `SPARKLE_EDDSA_KEY` - Sparkle EdDSA private key
-
-## URLs
-
-- Appcast: `https://YOUR_USERNAME.github.io/toolbox/appcast.xml`
-- Releases: `https://github.com/YOUR_USERNAME/toolbox/releases`
