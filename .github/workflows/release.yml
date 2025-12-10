@@ -59,7 +59,7 @@ jobs:
         xcodebuild -exportArchive \
           -archivePath Toolbox.xcarchive \
           -exportPath Release \
-          -exportOptionsPlist Toolbox/export.plist
+          -exportOptionsPlist Configuration/export.plist
 
     - name: Create DMG
       run: |
@@ -148,6 +148,9 @@ jobs:
         from datetime import datetime
         import os
 
+        ET.register_namespace('sparkle', 'http://www.andymatuschak.org/xml-namespaces/sparkle')
+        ET.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
+
         tree = ET.parse('docs/appcast.xml')
         root = tree.getroot()
         channel = root.find('channel')
@@ -160,9 +163,9 @@ jobs:
         enclosure.set('url', os.environ['DOWNLOAD_URL'])
         enclosure.set('length', os.environ['SPARKLE_LENGTH'])
         enclosure.set('type', 'application/octet-stream')
-        enclosure.set('sparkle:version', '${{ steps.version.outputs.VERSION }}')
-        enclosure.set('sparkle:shortVersionString', '${{ steps.version.outputs.VERSION }}')
-        enclosure.set('sparkle:edSignature', os.environ['SPARKLE_SIGNATURE'])
+        enclosure.set('{http://www.andymatuschak.org/xml-namespaces/sparkle}version', '${{ steps.version.outputs.VERSION }}')
+        enclosure.set('{http://www.andymatuschak.org/xml-namespaces/sparkle}shortVersionString', '${{ steps.version.outputs.VERSION }}')
+        enclosure.set('{http://www.andymatuschak.org/xml-namespaces/sparkle}edSignature', os.environ['SPARKLE_SIGNATURE'])
 
         tree.write('docs/appcast.xml', encoding='utf-8', xml_declaration=True)
         EOF

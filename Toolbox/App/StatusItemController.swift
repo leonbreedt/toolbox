@@ -122,6 +122,15 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     checkForUpdatesItem.target = self
     menu.addItem(checkForUpdatesItem)
 
+    let startAtLoginItem = NSMenuItem(
+      title: "Start at Login",
+      action: #selector(toggleStartAtLogin),
+      keyEquivalent: ""
+    )
+    startAtLoginItem.target = self
+    startAtLoginItem.state = LoginItemManager.shared.isEnabled ? .on : .off
+    menu.addItem(startAtLoginItem)
+
     let aboutTitle = "About"
     let aboutItem = NSMenuItem(
       title: aboutTitle,
@@ -217,6 +226,21 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
   @objc private func checkForUpdates() {
     updater?.checkForUpdates()
+  }
+
+  @objc private func toggleStartAtLogin() {
+    do {
+      try LoginItemManager.shared.toggle()
+    } catch {
+      NSLog("Failed to toggle start at login: \(error)")
+      let alert = NSAlert()
+      alert.messageText = "Failed to Update Login Item"
+      alert.informativeText =
+        "Could not change the start at login setting: \(error.localizedDescription)"
+      alert.alertStyle = .warning
+      alert.addButton(withTitle: "OK")
+      alert.runModal()
+    }
   }
 
   @objc private func showAbout() {
