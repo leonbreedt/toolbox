@@ -5,5 +5,5 @@
     <link>https://leonbreedt.github.io/toolbox/appcast.xml</link>
     <description>Most recent updates to Toolbox</description>
     <language>en</language>
-  <item><title>Version 1.0.7</title><pubDate>Wed, 10 Dec 2025 05:08:15 +0000</pubDate><enclosure url="https://github.com/leonbreedt/toolbox/releases/download/v1.0.7/Toolbox.dmg" length="1334090" type="application/octet-stream" sparkle:version="1.0.7" sparkle:shortVersionString="1.0.7" sparkle:edSignature="etxRnawDFjrtwdfBJWX166BChHdDnhM/FTyZC+GEE8NQLl6Hv6uiArFSJ7M0DQgX4p0p1EdSu+VxNaoODL0zCA==" /></item></channel>
+  <item><title>Version 1.0.8</title><pubDate>Wed, 10 Dec 2025 05:14:44 +0000</pubDate><enclosure url="https://github.com/leonbreedt/toolbox/releases/download/v1.0.8/Toolbox.dmg" length="1334281" type="application/octet-stream" sparkle:version="1.0.8" sparkle:shortVersionString="1.0.8" sparkle:edSignature="tLgnV7H/BORoy+/5jcBON1GhUbOkMgiA6BYu/WBzQh4wi/lawV1j/62Wlfh1ysAKVd8u07PfCTQ9yr/QPtaGCQ==" /></item></channel>
 </rss>
