@@ -148,7 +148,7 @@ jobs:
 
     - name: Update Sparkle appcast
       run: |
-        export DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.VERSION }}/Toolbox.dmg"
+        export DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.TOOLBOX_VERSION }}/Toolbox.dmg"
 
         python3 << 'EOF'
         import xml.etree.ElementTree as ET
