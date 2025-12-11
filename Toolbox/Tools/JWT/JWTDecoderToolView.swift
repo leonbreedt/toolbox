@@ -29,6 +29,10 @@ struct JWTDecoderToolView: View {
   private var headerColor: Color { Color(hex: "#2B5F55") }
   private var payloadColor: Color { .black }
   private var signatureColor: Color { Color(hex: "#2F3D9A") }
+  private let tokenPaneMinHeight: CGFloat = 240
+  private let headerPaneMinHeight: CGFloat = 160
+  private let payloadPaneMinHeight: CGFloat = 200
+  private let panePadding: CGFloat = 12
 
   var body: some View {
     VStack(spacing: 8) {
@@ -45,7 +49,7 @@ struct JWTDecoderToolView: View {
       }
 
       VSplitView {
-        Pane(paddingTop: 0, paddingBottom: 12) {
+        Pane(paddingTop: panePadding, paddingBottom: panePadding) {
           GroupBox("Token") {
             RawTokenPartsEditor(
               text: $editableToken.rawToken,
@@ -64,10 +68,11 @@ struct JWTDecoderToolView: View {
             }
           }
           .layoutPriority(1)
-          .frame(minHeight: 200)
         }
+        .frame(minHeight: tokenPaneMinHeight)
+        .layoutPriority(1)
 
-        Pane(paddingTop: 20, paddingBottom: 12) {
+        Pane(paddingTop: panePadding, paddingBottom: panePadding) {
           GroupBox("Header") {
             TextEditor(
               text: Binding(
@@ -83,10 +88,11 @@ struct JWTDecoderToolView: View {
             .scrollContentBackground(.hidden)
             .background(Color.clear)
           }
-          .frame(minHeight: 100)
         }
+        .frame(minHeight: headerPaneMinHeight)
+        .layoutPriority(1)
 
-        Pane(paddingTop: 20, paddingBottom: 0) {
+        Pane(paddingTop: panePadding, paddingBottom: panePadding) {
           GroupBox("Payload") {
             TextEditor(
               text: Binding(
@@ -102,12 +108,14 @@ struct JWTDecoderToolView: View {
             .scrollContentBackground(.hidden)
             .background(Color.clear)
           }
-          .frame(minHeight: 140)
         }
+        .frame(minHeight: payloadPaneMinHeight)
+        .layoutPriority(1)
       }
       .frame(maxHeight: .infinity)
     }
     .padding(12)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     .toolbar {
       ToolbarItem(placement: .primaryAction) {
         Button {
@@ -181,7 +189,7 @@ struct JWTDecoderToolView: View {
     let parts = token.split(separator: ".")
     guard parts.count == 3 else { return false }
     return parts.allSatisfy { part in
-      base64UrlDecode(String(part)) != nil
+      (try? base64UrlDecode(String(part))) != nil
     }
   }
 }

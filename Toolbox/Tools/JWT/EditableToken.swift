@@ -11,6 +11,7 @@ enum TokenError: Error {
   case invalidJWTFormat
   case invalidBase64(String)
   case invalidJSON(String)
+  case notJSONObject
 }
 
 extension TokenError: CustomStringConvertible {
@@ -19,9 +20,11 @@ extension TokenError: CustomStringConvertible {
     case .invalidJWTFormat:
       "An encoded JWT must contain three '.' separated Base-64 encoded parts."
     case .invalidBase64(_):
-      "A Base-64 string could not be decoded."
+      "Base-64 value could not be decoded."
     case .invalidJSON(_):
-      "JSON payload could not be parsed."
+      "JSON could not be parsed."
+    case .notJSONObject:
+      "JSON is not an object."
     }
   }
 }
@@ -87,9 +90,11 @@ final class EditableToken {
 
     do {
       try extractParts(fromRawToken: trimmedToken)
-      decodeParts()
+      try decodeParts()
 
       errorMessage = nil
+    } catch let error as TokenError {
+      errorMessage = "\(error.description)"
     } catch {
       errorMessage = "\(error.localizedDescription)"
     }
@@ -118,22 +123,32 @@ final class EditableToken {
     signatureBase64 = nil
   }
 
-  private func decodeParts() {
-    let headerJsonData = headerBase64.flatMap { base64UrlDecode($0) }
-    let payloadJsonData = payloadBase64.flatMap { base64UrlDecode($0) }
+  private func decodeParts() throws {
+    var headerJsonData: Data?
+    if let headerBase64 {
+      headerJsonData = try base64UrlDecode(headerBase64)
+    }
+
+    var payloadJsonData: Data?
+    if let payloadBase64 {
+      payloadJsonData = try base64UrlDecode(payloadBase64)
+    }
+
     let headerJsonString = headerJsonData.flatMap { stringFromAnyEncoding($0) }
     let payloadJsonString = payloadJsonData.flatMap {
       stringFromAnyEncoding($0)
     }
 
-    headerJson =
-      headerJsonString.flatMap { try? parseJsonString($0) }.flatMap {
-        prettyPrintJson($0)
-      } ?? headerJsonString
-    payloadJson =
-      payloadJsonString.flatMap { try? parseJsonString($0) }.flatMap {
-        prettyPrintJson($0)
-      } ?? payloadJsonString
+    headerJson = headerJsonString
+    payloadJson = payloadJsonString
+
+    if let headerJsonString {
+      headerJson = prettyPrintJson(try parseJsonString(headerJsonString))
+    }
+
+    if let payloadJsonString {
+      payloadJson = prettyPrintJson(try parseJsonString(payloadJsonString))
+    }
   }
 
   private func rebuildRawTokenFromParts() {
@@ -147,7 +162,7 @@ final class EditableToken {
 }
 
 // From https://github.com/auth0/JWTDecode.swift/blob/master/JWTDecode/JWTDecode.swift
-func base64UrlDecode(_ value: String) -> Data? {
+func base64UrlDecode(_ value: String) throws -> Data {
   var base64 =
     value
     .replacingOccurrences(of: "-", with: "+")
@@ -163,13 +178,20 @@ func base64UrlDecode(_ value: String) -> Data? {
     )
     base64 += padding
   }
-  return Data(base64Encoded: base64, options: .ignoreUnknownCharacters)
+  guard
+    let data = Data(base64Encoded: base64, options: .ignoreUnknownCharacters)
+  else {
+    throw TokenError.invalidBase64(value)
+  }
+
+  return data
 }
 
 func base64UrlEncode(_ value: String) -> String {
   guard let data = value.data(using: .utf8) else { return "" }
   let base64 = data.base64EncodedString()
-  return base64
+  return
+    base64
     .replacingOccurrences(of: "+", with: "-")
     .replacingOccurrences(of: "/", with: "_")
     .replacingOccurrences(of: "=", with: "")
@@ -177,11 +199,20 @@ func base64UrlEncode(_ value: String) -> String {
 
 private func parseJsonString(_ jsonString: String) throws -> [String: Any] {
   guard
-    let jsonData = jsonString.data(using: .utf8),
-    let json = try? JSONSerialization.jsonObject(with: jsonData, options: []),
-    let jsonObject = json as? [String: Any]
+    let jsonData = jsonString.data(using: .utf8)
   else {
     throw TokenError.invalidJSON(jsonString)
+  }
+
+  var json: Any
+  do {
+    json = try JSONSerialization.jsonObject(with: jsonData, options: [])
+  } catch {
+    throw TokenError.invalidJSON(jsonString)
+  }
+
+  guard let jsonObject = json as? [String: Any] else {
+    throw TokenError.notJSONObject
   }
 
   return jsonObject

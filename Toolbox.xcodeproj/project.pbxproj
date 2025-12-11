@@ -14,6 +14,16 @@
 		35F3B3A62EE7BEA300D8E570 /* Toolbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Toolbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		352389E32EEAD0400078AAE0 /* Exceptions for "Toolbox" folder in "Toolbox" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/Info.plist,
+			);
+			target = 35F3B3A52EE7BEA300D8E570 /* Toolbox */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3535AC9E2EE93522008ED789 /* Configuration */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -22,6 +32,9 @@
 		};
 		35F3B3A82EE7BEA300D8E570 /* Toolbox */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				352389E32EEAD0400078AAE0 /* Exceptions for "Toolbox" folder in "Toolbox" target */,
+			);
 			path = Toolbox;
 			sourceTree = "<group>";
 		};
@@ -277,7 +290,7 @@
 				CODE_SIGN_ENTITLEMENTS = Toolbox/Toolbox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 101;
 				DEVELOPMENT_TEAM = LYQ233Q3R9;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -285,6 +298,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Toolbox/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Toolbox;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_LSBackgroundOnly = NO;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "©️ 2025-2026 Leon Breedt";
@@ -292,7 +307,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = io.sector42.Toolbox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -313,7 +328,7 @@
 				CODE_SIGN_ENTITLEMENTS = Toolbox/Toolbox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 101;
 				DEVELOPMENT_TEAM = LYQ233Q3R9;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -321,6 +336,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Toolbox/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Toolbox;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_LSBackgroundOnly = NO;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "©️ 2025-2026 Leon Breedt";
@@ -328,7 +345,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = io.sector42.Toolbox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

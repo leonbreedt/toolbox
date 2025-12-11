@@ -10,7 +10,7 @@ import SwiftUI
 /// Raw JWT token editor, colorizing the header, payload and signature parts.
 struct RawTokenPartsEditor: NSViewRepresentable {
   @Binding var text: String
-  
+
   let font: NSFont
   let headerColor: NSColor
   let payloadColor: NSColor
@@ -71,7 +71,8 @@ struct RawTokenPartsEditor: NSViewRepresentable {
             equalTo: contentView.topAnchor,
             constant: inset.height
           ),
-          label.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -4)
+          label.trailingAnchor.constraint(
+            lessThanOrEqualTo: contentView.trailingAnchor, constant: -4),
         ])
       }
 
@@ -209,8 +210,8 @@ struct RawTokenPartsEditor: NSViewRepresentable {
   }
 }
 
-private extension NSView {
-  func descendants() -> [NSView] {
+extension NSView {
+  fileprivate func descendants() -> [NSView] {
     var result: [NSView] = [self]
     for sub in subviews {
       result.append(contentsOf: sub.descendants())

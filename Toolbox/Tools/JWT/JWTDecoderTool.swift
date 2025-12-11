@@ -14,7 +14,7 @@ struct JWTDecoderTool: @MainActor Tool {
   let category = ToolCategory.development
   let icon = "key.viewfinder"
   let presentationStyle = ToolPresentationStyle.window(
-    size: CGSize(width: 640, height: 700),
+    size: CGSize(width: 800, height: 700),
     resizable: true
   )
 
