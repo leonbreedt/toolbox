@@ -3,9 +3,10 @@
 ## 1.0.11 (2025-12-11)
 
 - Reworked JWT decoding tool user interface
+- Allow resizing JWT tool fields using splitters
 - Allow editing of JWT header and payload, and recomputing JWT token
-- Remove Paste and Decode buttons
-- Move Clear button to toolbar
+- Remove Paste and Decode buttons from JWT tool
+- Move JWT tool Clear button to toolbar
 
 ## 1.0.10 (2025-12-11)
 
