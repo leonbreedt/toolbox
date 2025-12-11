@@ -140,6 +140,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     aboutItem.target = self
     menu.addItem(aboutItem)
 
+    menu.addItem(.separator())
+
     let quitItem = NSMenuItem(
       title: "Quit",
       action: #selector(quitApp),

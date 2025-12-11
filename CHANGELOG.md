@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.10 (2025-12-11)
+
+- Fix that shortcuts could not be used in the JWT editor text areas.
+
 ## 1.0.7 (2025-12-10)
 
 - Added "Start at Login" option in status menu.

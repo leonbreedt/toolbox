@@ -106,7 +106,10 @@ jobs:
 
     - name: Read version from tag
       id: version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      run: |
+        echo "TOOLBOX_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        echo "TOOLBOX_BUILD=$(agvtool vers -terse)" >> $GITHUB_OUTPUT
+
 
     - name: Install Sparkle tools
       run: |
@@ -160,15 +163,15 @@ jobs:
         channel = root.find('channel')
 
         item = ET.SubElement(channel, 'item')
-        ET.SubElement(item, 'title').text = f"Version ${{ steps.version.outputs.VERSION }}"
+        ET.SubElement(item, 'title').text = f"Version ${{ steps.version.outputs.TOOLBOX_VERSION }}"
         ET.SubElement(item, 'pubDate').text = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S +0000')
 
         enclosure = ET.SubElement(item, 'enclosure')
         enclosure.set('url', os.environ['DOWNLOAD_URL'])
         enclosure.set('length', os.environ['SPARKLE_LENGTH'])
         enclosure.set('type', 'application/octet-stream')
-        enclosure.set('{http://www.andymatuschak.org/xml-namespaces/sparkle}version', '${{ steps.version.outputs.VERSION }}')
-        enclosure.set('{http://www.andymatuschak.org/xml-namespaces/sparkle}shortVersionString', '${{ steps.version.outputs.VERSION }}')
+        enclosure.set('{http://www.andymatuschak.org/xml-namespaces/sparkle}version', '${{ steps.version.outputs.TOOLBOX_BUILD }}')
+        enclosure.set('{http://www.andymatuschak.org/xml-namespaces/sparkle}shortVersionString', '${{ steps.version.outputs.TOOLBOX_VERSION }}')
         enclosure.set('{http://www.andymatuschak.org/xml-namespaces/sparkle}edSignature', os.environ['SPARKLE_SIGNATURE'])
 
         tree.write('docs/appcast.xml', encoding='utf-8', xml_declaration=True)

@@ -54,40 +54,6 @@ struct JWTDecoderView: View {
 
   var body: some View {
     VStack(spacing: 12) {
-      // Controls
-      HStack {
-        Button {
-          if let paste = NSPasteboard.general.string(forType: .string) {
-            input = paste.trimmingCharacters(
-              in: .whitespacesAndNewlines
-            )
-            context.save(input, forKey: "input")
-            decode()
-          }
-        } label: {
-          Label("Paste", systemImage: "doc.on.clipboard")
-        }
-        .buttonStyle(.bordered)
-
-        Button {
-          input = ""
-          context.save(input, forKey: "input")
-          clearOutput()
-        } label: {
-          Label("Clear", systemImage: "trash")
-        }
-        .buttonStyle(.bordered)
-
-        Spacer()
-
-        Button {
-          decode()
-        } label: {
-          Label("Decode", systemImage: "arrow.down.doc")
-        }
-        .buttonStyle(.borderedProminent)
-      }
-
       GroupBox("Encoded JWT") {
         ColorizedTextEditor(
           text: $input,
@@ -154,6 +120,18 @@ struct JWTDecoderView: View {
       }
     }
     .padding(12)
+    .toolbar {
+      ToolbarItem(placement: .primaryAction) {
+        Button {
+          input = ""
+          context.save(input, forKey: "input")
+          clearOutput()
+        } label: {
+          Label("Clear", systemImage: "trash")
+        }
+        .help("Clear the input and output")
+      }
+    }
     .onAppear {
       if !input.isEmpty {
         decode()
